@@ -2,6 +2,7 @@ package io.jamesclonk.oevview
 
 import androidx.appcompat.app.AppCompatActivity
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -10,19 +11,21 @@ import android.os.Looper
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsets
+import android.widget.EditText
 import android.widget.LinearLayout
-import android.widget.TextView
 import io.jamesclonk.oevview.databinding.ActivityMainBinding
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
+const val URL_MESSAGE = "io.jamesclonk.oevview.URL_MESSAGE"
+const val URL_A_DEFAULT = "https://oevplus.ch/monitor/?viewType=splitView&layout=1&showClock=true&showPerron=true&stationGroup1Title=Bern%20HB&stationGroup2Title=Bern%2C%20Wankdorf%20Center&station_1_id=85%3A7000&station_1_name=Bern&station_1_quantity=10&station_1_group=1&station_2_id=85%3A88699&station_2_name=Bern%2C%20Wankdorf%20Center&station_2_quantity=5&station_2_group=2"
+const val URL_B_DEFAULT = "https://oevplus.ch/"
+const val URL_C_DEFAULT = "https://www.srf.ch/news"
+const val URL_D_DEFAULT = "https://jamesclonk.io/news"
+const val URL_E_DEFAULT = "https://news.ycombinator.com/"
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var fullscreenContent: TextView
-    private lateinit var fullscreenContentControls: LinearLayout
+    private lateinit var fullscreenContent: LinearLayout
     private val hideHandler = Handler(Looper.myLooper()!!)
 
     @SuppressLint("InlinedApi")
@@ -46,7 +49,6 @@ class MainActivity : AppCompatActivity() {
     private val showPart2Runnable = Runnable {
         // Delayed display of UI elements
         supportActionBar?.show()
-        fullscreenContentControls.visibility = View.VISIBLE
     }
     private var isFullscreen: Boolean = false
 
@@ -84,17 +86,35 @@ class MainActivity : AppCompatActivity() {
         fullscreenContent = binding.fullscreenContent
         fullscreenContent.setOnClickListener { toggle() }
 
-        fullscreenContentControls = binding.fullscreenContentControls
-
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        binding.dummyButton.setOnTouchListener(delayHideTouchListener)
+        restoreSettings()
     }
 
     fun display(view: View) {
-        val intent = Intent(this, WebViewActivity::class.java).apply {}
+        saveSettings()
+
+        val url: String
+        when(view.id) {
+            R.id.display_url_a -> url = findViewById<EditText>(R.id.url_a).text.toString()
+            R.id.display_url_b -> url = findViewById<EditText>(R.id.url_b).text.toString()
+            R.id.display_url_c -> url = findViewById<EditText>(R.id.url_c).text.toString()
+            R.id.display_url_d -> url = findViewById<EditText>(R.id.url_d).text.toString()
+            R.id.display_url_e -> url = findViewById<EditText>(R.id.url_e).text.toString()
+            else -> url = URL_A_DEFAULT
+        }
+
+        val intent = Intent(this, WebViewActivity::class.java).apply {
+            putExtra(URL_MESSAGE, url)
+        }
         startActivity(intent)
+    }
+
+    fun reset(view: View) {
+        findViewById<EditText>(R.id.url_a).setText(URL_A_DEFAULT)
+        findViewById<EditText>(R.id.url_b).setText(URL_B_DEFAULT)
+        findViewById<EditText>(R.id.url_c).setText(URL_C_DEFAULT)
+        findViewById<EditText>(R.id.url_d).setText(URL_D_DEFAULT)
+        findViewById<EditText>(R.id.url_e).setText(URL_E_DEFAULT)
+        saveSettings()
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -104,6 +124,26 @@ class MainActivity : AppCompatActivity() {
         // created, to briefly hint to the user that UI controls
         // are available.
         delayedHide(100)
+    }
+
+    private fun saveSettings() {
+        val prefs = getPreferences(Context.MODE_PRIVATE)
+        val edit = prefs.edit()
+        edit.putString("io.jamesclonk.oevview.url_a", findViewById<EditText>(R.id.url_a).text.toString())
+        edit.putString("io.jamesclonk.oevview.url_b", findViewById<EditText>(R.id.url_b).text.toString())
+        edit.putString("io.jamesclonk.oevview.url_c", findViewById<EditText>(R.id.url_c).text.toString())
+        edit.putString("io.jamesclonk.oevview.url_d", findViewById<EditText>(R.id.url_d).text.toString())
+        edit.putString("io.jamesclonk.oevview.url_e", findViewById<EditText>(R.id.url_e).text.toString())
+        edit.commit()
+    }
+
+    private fun restoreSettings() {
+        val prefs = getPreferences(Context.MODE_PRIVATE)
+        findViewById<EditText>(R.id.url_a).setText(prefs.getString("io.jamesclonk.oevview.url_a", URL_A_DEFAULT))
+        findViewById<EditText>(R.id.url_b).setText(prefs.getString("io.jamesclonk.oevview.url_b", URL_B_DEFAULT))
+        findViewById<EditText>(R.id.url_c).setText(prefs.getString("io.jamesclonk.oevview.url_c", URL_C_DEFAULT))
+        findViewById<EditText>(R.id.url_d).setText(prefs.getString("io.jamesclonk.oevview.url_d", URL_D_DEFAULT))
+        findViewById<EditText>(R.id.url_e).setText(prefs.getString("io.jamesclonk.oevview.url_e", URL_E_DEFAULT))
     }
 
     private fun toggle() {
@@ -117,7 +157,6 @@ class MainActivity : AppCompatActivity() {
     private fun hide() {
         // Hide UI first
         supportActionBar?.hide()
-        fullscreenContentControls.visibility = View.GONE
         isFullscreen = false
 
         // Schedule a runnable to remove the status and navigation bar after a delay

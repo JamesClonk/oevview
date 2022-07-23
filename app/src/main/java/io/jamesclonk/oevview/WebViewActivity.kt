@@ -58,8 +58,9 @@ class WebViewActivity : AppCompatActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         // init webview
+        val url = intent.getStringExtra(URL_MESSAGE)
         fullscreenContent.settings.javaScriptEnabled = true
-        fullscreenContent.loadUrl("https://www.oevplus.ch/monitor/?viewType=splitView&layout=1&showClock=true&showPerron=true&stationGroup1Title=Bern%2C%20Schwarzenburgstrasse&stationGroup2Title=Bern%2C%20Weissenb%C3%BChl&station_1_id=85%3A90054&station_1_name=Bern%2C%20D%C3%BCbystrasse&station_1_quantity=5&station_1_group=1&station_2_id=85%3A90011&station_2_name=Bern%2C%20C%C3%A4cilienstrasse&station_2_quantity=4&station_2_group=1&station_3_id=85%3A7079&station_3_name=Bern%20Weissenb%C3%BChl&station_3_quantity=3&station_3_group=2&station_4_id=85%3A95142&station_4_name=Bern%2C%20Weissenb%C3%BChl%20(Tram)&station_4_quantity=3&station_4_group=2&station_5_id=85%3A95931&station_5_name=Bern%20Weissenb%C3%BChl%2C%20Bahnhof&station_5_quantity=2&station_5_group=2")
+        fullscreenContent.loadUrl(url.orEmpty())
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
