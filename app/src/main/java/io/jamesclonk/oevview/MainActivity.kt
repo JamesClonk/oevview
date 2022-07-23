@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity() {
         binding.dummyButton.setOnTouchListener(delayHideTouchListener)
     }
 
-    fun display() {
+    fun display(view: View) {
         val intent = Intent(this, WebViewActivity::class.java).apply {}
         startActivity(intent)
     }

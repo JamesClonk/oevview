@@ -24,7 +24,7 @@
             android:theme="@style/Theme.Oevview.Fullscreen">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="io.jamesclonk.oevplus.MainActivity" />
+                android:value="io.jamesclonk.oevview.MainActivity" />
         </activity>
         <activity
             android:name=".MainActivity"
